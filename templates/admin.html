@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Gerencial | BurgerSync Ourinhos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col font-sans selection:bg-amber-500 selection:text-black">
+
+  <!-- Top Navbar -->
+  <header class="bg-gray-900 border-b border-gray-800 sticky top-0 z-30 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
+          <i class="fa-solid fa-burger text-lg"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-bold text-white tracking-tight">BurgerSync</h1>
+            <span class="text-xs bg-amber-500/10 text-amber-400 font-medium px-2 py-0.5 rounded border border-amber-500/20">Ourinhos</span>
+            <span class="text-xs bg-gray-800 text-gray-300 font-semibold px-2 py-0.5 rounded border border-gray-700">Admin</span>
+          </div>
+          <p class="text-[11px] text-gray-400">Gestão e Monitoramento de Feedbacks em Tempo Real</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <button onclick="carregarDados()" title="Atualizar dados agora" class="px-3 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs border border-gray-700 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-rotate" id="refresh-icon"></i>
+          <span class="hidden sm:inline">Atualizar</span>
+        </button>
+
+        <button onclick="abrirModalAlertas()" title="Ver histórico de alertas de crise" class="px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-300 text-xs border border-red-800/60 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-bell"></i>
+          <span>Alertas SMTP</span>
+        </button>
+
+        <a href="/" target="_blank" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs border border-amber-500/30 flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          <span class="hidden sm:inline">Página do Cliente</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Banner de Crise Ativa (se houver feedbacks críticos pendentes) -->
+  <div id="banner-crise" class="hidden bg-gradient-to-r from-red-950 via-red-900 to-red-950 border-b border-red-700 px-4 py-2.5 text-center text-xs text-red-100 flex items-center justify-center gap-2">
+    <i class="fa-solid fa-triangle-exclamation text-amber-300 animate-pulse text-sm"></i>
+    <span class="font-bold">ATENÇÃO GERENCIAL:</span>
+    <span id="banner-crise-msg">Existem avaliações críticas pendentes de tratamento imediato!</span>
+    <button onclick="filtrarApenasCriticosPendentes()" class="ml-2 underline text-white font-semibold hover:text-amber-200">
+      Filtrar agora &rarr;
+    </button>
+  </div>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow space-y-6">
+
+    <!-- Metric Cards Grid -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+      <!-- Total -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow flex flex-col justify-between">
+        <span class="text-xs font-medium text-gray-400">Total de Avaliações</span>
+        <div class="flex items-baseline justify-between mt-2">
+          <span id="metric-total" class="text-2xl font-extrabold text-white">0</span>
+          <i class="fa-solid fa-comments text-gray-600 text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Positivos -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-emerald-400">Positivos</span>
+          <span id="metric-perc-pos" class="text-[11px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">0%</span>
+        </div>
+        <div class="flex items-baseline justify-between mt-2">
+          <span id="metric-positivos" class="text-2xl font-extrabold text-emerald-400">0</span>
+          <i class="fa-solid fa-face-smile text-emerald-500/30 text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Neutros -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-amber-400">Neutros</span>
+          <span id="metric-perc-neu" class="text-[11px] font-bold text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">0%</span>
+        </div>
+        <div class="flex items-baseline justify-between mt-2">
+          <span id="metric-neutros" class="text-2xl font-extrabold text-amber-400">0</span>
+          <i class="fa-solid fa-face-meh text-amber-500/30 text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Críticos -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-red-400">Críticos</span>
+          <span id="metric-perc-cri" class="text-[11px] font-bold text-red-400 bg-red-500/10 px-1.5 py-0.5 rounded">0%</span>
+        </div>
+        <div class="flex items-baseline justify-between mt-2">
+          <span id="metric-criticos" class="text-2xl font-extrabold text-red-400">0</span>
+          <i class="fa-solid fa-triangle-exclamation text-red-500/30 text-lg"></i>
+        </div>
+      </div>
+
+      <!-- Críticos Pendentes -->
+      <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow flex flex-col justify-between col-span-2 lg:col-span-1">
+        <span class="text-xs font-medium text-purple-400">Críticos Pendentes</span>
+        <div class="flex items-baseline justify-between mt-2">
+          <span id="metric-criticos-pendentes" class="text-2xl font-extrabold text-purple-400">0</span>
+          <span class="text-xs text-gray-500">Ação urgente</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tags Frequentes Bar -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-3 flex flex-wrap items-center gap-2 text-xs">
+      <span class="text-gray-400 font-medium mr-1 flex items-center gap-1.5">
+        <i class="fa-solid fa-tags text-amber-500"></i> Tags em Alta:
+      </span>
+      <div id="container-tags-alta" class="flex flex-wrap gap-1.5">
+        <!-- Injetado dinamicamente -->
+      </div>
+    </div>
+
+    <!-- Filter and Search Controls -->
+    <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 shadow space-y-3">
+      <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+        
+        <!-- Search Input -->
+        <div class="relative flex-grow max-w-md">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-gray-500 text-xs"></i>
+          <input type="text" id="filtro-busca" placeholder="Buscar por cliente, pedido, palavra-chave ou tag..."
+                 oninput="aplicarFiltros()"
+                 class="w-full bg-gray-950 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Filter Selects -->
+        <div class="flex flex-wrap gap-2 items-center">
+          <!-- Sentimento -->
+          <select id="filtro-sentimento" onchange="aplicarFiltros()"
+                  class="bg-gray-950 border border-gray-700 text-gray-300 text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-amber-500">
+            <option value="todos">Todos os Sentimentos</option>
+            <option value="Positivo">🟢 Positivos</option>
+            <option value="Neutro">🟡 Neutros</option>
+            <option value="Crítico">🔴 Críticos</option>
+          </select>
+
+          <!-- Status -->
+          <select id="filtro-status" onchange="aplicarFiltros()"
+                  class="bg-gray-950 border border-gray-700 text-gray-300 text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-amber-500">
+            <option value="todos">Todos os Status</option>
+            <option value="pendente">⏳ Pendentes</option>
+            <option value="tratado">✅ Tratados</option>
+          </select>
+
+          <!-- Ordenação -->
+          <select id="filtro-ordem" onchange="aplicarFiltros()"
+                  class="bg-gray-950 border border-gray-700 text-gray-300 text-xs rounded-lg px-2.5 py-2 focus:outline-none focus:border-amber-500">
+            <option value="recente">Mais Recentes</option>
+            <option value="antigo">Mais Antigos</option>
+            <option value="nota_desc">Maior Nota</option>
+            <option value="nota_asc">Menor Nota</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedbacks List / Table -->
+    <div class="space-y-3" id="lista-feedbacks">
+      <!-- Injetado dinamicamente -->
+    </div>
+
+  </main>
+
+  <!-- Modal de Histórico de Alertas SMTP -->
+  <div id="modal-alertas" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-gray-900 border border-gray-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div class="p-4 border-b border-gray-800 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-red-400">
+          <i class="fa-solid fa-envelope-circle-check text-lg"></i>
+          <h3 class="font-bold text-white text-sm">Histórico de Disparos de Alerta Crítico (.tmp/alerts.log)</h3>
+        </div>
+        <button onclick="fecharModalAlertas()" class="text-gray-400 hover:text-white text-lg px-2">&times;</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-3 font-mono text-xs text-gray-300 flex-grow bg-gray-950" id="conteudo-alertas-log">
+        <!-- Injetado dinamicamente -->
+      </div>
+
+      <div class="p-3 border-t border-gray-800 bg-gray-900 flex justify-end">
+        <button onclick="fecharModalAlertas()" class="px-4 py-1.5 rounded-lg bg-gray-800 hover:bg-gray-700 text-xs text-white">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-gray-900 border-t border-gray-800 py-4 text-center text-xs text-gray-500 mt-12">
+    <p>BurgerSync Ourinhos &bull; Painel de Monitoramento &copy; 2026</p>
+  </footer>
+
+  <script>
+    let todosFeedbacks = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      carregarDados();
+      // Atualização periódica a cada 30 segundos
+      setInterval(carregarDados, 30000);
+    });
+
+    async function carregarDados() {
+      const icon = document.getElementById('refresh-icon');
+      if (icon) icon.classList.add('fa-spin');
+
+      try {
+        const [resFeedbacks, resStats] = await Promise.all([
+          fetch('/api/feedbacks'),
+          fetch('/api/stats')
+        ]);
+
+        if (resFeedbacks.ok) {
+          const dataF = await resFeedbacks.json();
+          todosFeedbacks = dataF.feedbacks || [];
+          aplicarFiltros();
+        }
+
+        if (resStats.ok) {
+          const stats = await resStats.json();
+          renderizarMetricas(stats);
+        }
+      } catch (e) {
+        console.error("Erro ao carregar dados:", e);
+      } finally {
+        if (icon) icon.classList.remove('fa-spin');
+      }
+    }
+
+    function renderizarMetricas(s) {
+      document.getElementById('metric-total').innerText = s.total || 0;
+      document.getElementById('metric-positivos').innerText = s.positivos || 0;
+      document.getElementById('metric-perc-pos').innerText = (s.perc_positivo || 0) + '%';
+      document.getElementById('metric-neutros').innerText = s.neutros || 0;
+      document.getElementById('metric-perc-neu').innerText = (s.perc_neutro || 0) + '%';
+      document.getElementById('metric-criticos').innerText = s.criticos || 0;
+      document.getElementById('metric-perc-cri').innerText = (s.perc_critico || 0) + '%';
+      document.getElementById('metric-criticos-pendentes').innerText = s.criticos_pendentes || 0;
+
+      // Banner de Crise
+      const banner = document.getElementById('banner-crise');
+      if (s.criticos_pendentes > 0) {
+        banner.classList.remove('hidden');
+        document.getElementById('banner-crise-msg').innerText = `Você possui ${s.criticos_pendentes} avaliação(ões) crítica(s) pendente(s) de atenção do gerente!`;
+      } else {
+        banner.classList.add('hidden');
+      }
+
+      // Tags em alta
+      const tagsBox = document.getElementById('container-tags-alta');
+      tagsBox.innerHTML = '';
+      (s.tags_populares || []).forEach(item => {
+        const span = document.createElement('span');
+        span.className = 'cursor-pointer px-2 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-amber-300 text-[11px] border border-gray-700 flex items-center gap-1';
+        span.innerHTML = `<span>#${item.tag}</span> <span class="text-gray-400 font-bold">(${item.count})</span>`;
+        span.onclick = () => {
+          document.getElementById('filtro-busca').value = item.tag;
+          aplicarFiltros();
+        };
+        tagsBox.appendChild(span);
+      });
+    }
+
+    function aplicarFiltros() {
+      const busca = (document.getElementById('filtro-busca').value || '').toLowerCase().trim();
+      const sentimentoFiltro = document.getElementById('filtro-sentimento').value;
+      const statusFiltro = document.getElementById('filtro-status').value;
+      const ordem = document.getElementById('filtro-ordem').value;
+
+      let filtrados = todosFeedbacks.filter(fb => {
+        // Sentimento
+        if (sentimentoFiltro !== 'todos' && fb.sentimento !== sentimentoFiltro) {
+          return false;
+        }
+        // Status
+        if (statusFiltro !== 'todos' && fb.status !== statusFiltro) {
+          return false;
+        }
+        // Busca
+        if (busca) {
+          const nome = (fb.nome || '').toLowerCase();
+          const pedido = (fb.pedido_id || '').toLowerCase();
+          const comentario = (fb.comentario || '').toLowerCase();
+          const resumo = (fb.resumo_ia || '').toLowerCase();
+          const tags = (fb.tags || []).join(' ').toLowerCase();
+
+          const matches = nome.includes(busca) || pedido.includes(busca) || comentario.includes(busca) || resumo.includes(busca) || tags.includes(busca);
+          if (!matches) return false;
+        }
+        return true;
+      });
+
+      // Ordenação
+      filtrados.sort((a, b) => {
+        if (ordem === 'recente') {
+          return new Date(b.data_hora || 0) - new Date(a.data_hora || 0);
+        } else if (ordem === 'antigo') {
+          return new Date(a.data_hora || 0) - new Date(b.data_hora || 0);
+        } else if (ordem === 'nota_desc') {
+          return (b.nota || 0) - (a.nota || 0);
+        } else if (ordem === 'nota_asc') {
+          return (a.nota || 0) - (b.nota || 0);
+        }
+        return 0;
+      });
+
+      renderizarListaFeedbacks(filtrados);
+    }
+
+    function renderizarListaFeedbacks(lista) {
+      const container = document.getElementById('lista-feedbacks');
+      container.innerHTML = '';
+
+      if (lista.length === 0) {
+        container.innerHTML = `
+          <div class="bg-gray-900 border border-gray-800 rounded-xl p-8 text-center text-gray-400">
+            <i class="fa-solid fa-inbox text-3xl mb-2 text-gray-600"></i>
+            <p class="text-sm">Nenhum feedback encontrado com os filtros selecionados.</p>
+          </div>
+        `;
+        return;
+      }
+
+      lista.forEach(fb => {
+        const card = document.createElement('div');
+        const isTratado = fb.status === 'tratado';
+        const isCritico = fb.sentimento === 'Crítico';
+
+        let borderClass = 'border-gray-800';
+        let bgSentimento = 'bg-gray-800 text-gray-300';
+
+        if (fb.sentimento === 'Positivo') {
+          bgSentimento = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+        } else if (fb.sentimento === 'Neutro') {
+          bgSentimento = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+        } else if (fb.sentimento === 'Crítico') {
+          bgSentimento = 'bg-red-500/20 text-red-400 border border-red-500/30';
+          if (!isTratado) {
+            borderClass = 'border-red-600/70 shadow-lg shadow-red-950/40 bg-red-950/10';
+          }
+        }
+
+        const dataFormatada = fb.data_hora ? new Date(fb.data_hora).toLocaleString('pt-BR') : 'Data não informada';
+
+        // Estrelas
+        let estrelasHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          if (i <= (fb.nota || 0)) {
+            estrelasHtml += '<i class="fa-solid fa-star text-amber-400 text-xs"></i>';
+          } else {
+            estrelasHtml += '<i class="fa-solid fa-star text-gray-700 text-xs"></i>';
+          }
+        }
+
+        // Tags
+        const tagsHtml = (fb.tags || []).map(t =>
+          `<span class="bg-gray-800 text-gray-300 px-2 py-0.5 rounded text-[11px] border border-gray-700">${t}</span>`
+        ).join('');
+
+        card.className = `bg-gray-900 border ${borderClass} rounded-xl p-5 transition space-y-3 relative`;
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-800 pb-3">
+            <div class="flex items-center gap-3">
+              <span class="font-bold text-sm text-white">${fb.nome || 'Cliente Anônimo'}</span>
+              ${fb.pedido_id ? `<span class="text-xs bg-gray-800 text-amber-300 font-mono px-2 py-0.5 rounded border border-gray-700">${fb.pedido_id}</span>` : ''}
+              <div class="flex items-center gap-1">${estrelasHtml}</div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${bgSentimento}">${fb.sentimento}</span>
+              ${fb.alerta_disparado ? `<span title="Alerta crítico gerencial disparado" class="text-[10px] bg-red-900/60 text-red-300 px-1.5 py-0.5 rounded border border-red-700 flex items-center gap-1"><i class="fa-solid fa-bell text-[9px]"></i> Alerta Enviado</span>` : ''}
+              <span class="text-[11px] text-gray-500">${dataFormatada}</span>
+            </div>
+          </div>
+
+          <!-- Comentário Original -->
+          <div class="text-xs text-gray-200 bg-gray-950 p-3 rounded-lg border border-gray-800/80 leading-relaxed font-sans">
+            "${fb.comentario || ''}"
+          </div>
+
+          <!-- Análise da IA -->
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs pt-1">
+            <div class="space-y-1">
+              <div class="flex items-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400 text-xs"></i>
+                <span class="font-medium text-gray-300">Análise IA:</span>
+                <span class="text-gray-400 italic">${fb.resumo_ia || 'Nenhum resumo'}</span>
+              </div>
+              <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                ${tagsHtml}
+              </div>
+            </div>
+
+            <!-- Botão de Marcar como Tratado / Contato -->
+            <div class="flex items-center gap-3 self-end sm:self-center shrink-0">
+              ${fb.contato ? `<a href="https://wa.me/55${fb.contato.replace(/\\D/g, '')}" target="_blank" class="text-emerald-400 hover:text-emerald-300 text-xs flex items-center gap-1 px-2.5 py-1 rounded bg-emerald-950/40 border border-emerald-800/40" title="Conversar no WhatsApp"><i class="fa-brands fa-whatsapp text-sm"></i> <span>${fb.contato}</span></a>` : ''}
+              
+              <button onclick="toggleTratado('${fb.id}')"
+                      class="px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${isTratado ? 'bg-gray-800 text-gray-400 hover:text-white border border-gray-700' : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-700/20'}">
+                <i class="fa-solid ${isTratado ? 'fa-arrow-rotate-left' : 'fa-check'}"></i>
+                <span>${isTratado ? 'Reabrir (Pendente)' : 'Marcar como Tratado'}</span>
+              </button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    async function toggleTratado(id) {
+      try {
+        const res = await fetch(`/api/feedbacks/${id}/tratar`, { method: 'POST' });
+        if (res.ok) {
+          carregarDados();
+        } else {
+          alert('Erro ao atualizar status.');
+        }
+      } catch (e) {
+        alert('Falha na requisição.');
+      }
+    }
+
+    function filtrarApenasCriticosPendentes() {
+      document.getElementById('filtro-sentimento').value = 'Crítico';
+      document.getElementById('filtro-status').value = 'pendente';
+      aplicarFiltros();
+    }
+
+    async function abrirModalAlertas() {
+      const modal = document.getElementById('modal-alertas');
+      const box = document.getElementById('conteudo-alertas-log');
+      box.innerHTML = '<p class="text-gray-500">Carregando logs de alerta...</p>';
+      modal.classList.remove('hidden');
+
+      try {
+        const res = await fetch('/api/alerts/log');
+        const data = await res.json();
+        if (data.alerts && data.alerts.length > 0) {
+          box.innerHTML = data.alerts.map(a => `<div class="p-2.5 rounded bg-gray-900 border border-gray-800 whitespace-pre-wrap">${a}</div>`).join('');
+        } else {
+          box.innerHTML = '<p class="text-gray-500">Nenhum alerta crítico registrado no momento.</p>';
+        }
+      } catch (e) {
+        box.innerHTML = '<p class="text-red-400">Falha ao carregar arquivo de logs .tmp/alerts.log</p>';
+      }
+    }
+
+    function fecharModalAlertas() {
+      document.getElementById('modal-alertas').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>

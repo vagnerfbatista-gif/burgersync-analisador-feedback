@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Ambiente e segredos
+.env
+.env.local
+
+# Temporários e Logs (conforme diretiva do projeto)
+.tmp/
+*.log
+
+# IDE
+.vscode/
+.idea/

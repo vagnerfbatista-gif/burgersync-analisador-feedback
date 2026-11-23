@@ -1,0 +1,91 @@
+[
+  {
+    "nome": "João Validador",
+    "contato": "(14) 98111-2233",
+    "pedido_id": "ORD-5500",
+    "nota": 5,
+    "comentario": "O burger bacon crocante é sem dúvidas o melhor de Ourinhos!",
+    "sentimento": "Positivo",
+    "tags": [
+      "Experiência Geral"
+    ],
+    "resumo_ia": "Avaliação classificada como positivo com foco em Experiência Geral.",
+    "status": "tratado",
+    "alerta_disparado": false,
+    "id": "fb-206851",
+    "data_hora": "2026-11-23T16:15:58.319155-03:00"
+  },
+  {
+    "id": "fb-1001",
+    "data_hora": "2026-11-23T14:30:00-03:00",
+    "nome": "Lucas Martins",
+    "contato": "(14) 99821-4455",
+    "pedido_id": "ORD-4088",
+    "nota": 5,
+    "comentario": "Lanche maravilhoso! O blend artesanal veio no ponto perfeito e a entrega foi super rápida aqui no Jardim Alvorada. Estão de parabéns!",
+    "sentimento": "Positivo",
+    "tags": [
+      "Sabor",
+      "Ponto da Carne",
+      "Entrega"
+    ],
+    "resumo_ia": "Cliente elogiou o sabor do lanche, o ponto da carne e a rapidez na entrega.",
+    "status": "tratado",
+    "alerta_disparado": false
+  },
+  {
+    "id": "fb-1002",
+    "data_hora": "2026-11-23T14:45:12-03:00",
+    "nome": "Camila Oliveira",
+    "contato": "camila.oliveira@email.com",
+    "pedido_id": "ORD-4091",
+    "nota": 3,
+    "comentario": "O burger é gostoso, mas achei a batata frita um pouco fria. A maionese da casa é muito boa, recomendo.",
+    "sentimento": "Neutro",
+    "tags": [
+      "Temperatura",
+      "Acompanhamento",
+      "Sabor"
+    ],
+    "resumo_ia": "Apreciou o lanche e a maionese, porém apontou batatas frias.",
+    "status": "pendente",
+    "alerta_disparado": false
+  },
+  {
+    "id": "fb-1003",
+    "data_hora": "2026-11-23T15:10:05-03:00",
+    "nome": "Rodrigo Silva",
+    "contato": "(14) 99754-1122",
+    "pedido_id": "ORD-4092",
+    "nota": 1,
+    "comentario": "Péssima experiência hoje. Meu pedido veio com o lanche completamente errado, frio e com 1 hora de atraso! Tentei mandar mensagem no WhatsApp e ninguém respondeu.",
+    "sentimento": "Crítico",
+    "tags": [
+      "Pedido Errado",
+      "Atraso",
+      "Temperatura",
+      "Atendimento"
+    ],
+    "resumo_ia": "Cliente revoltado com erro no pedido, lanche frio, atraso de 1 hora e falta de resposta no WhatsApp.",
+    "status": "pendente",
+    "alerta_disparado": true
+  },
+  {
+    "id": "fb-1004",
+    "data_hora": "2026-11-23T15:35:40-03:00",
+    "nome": "Mariana Santos",
+    "contato": "(14) 99182-3344",
+    "pedido_id": "ORD-4095",
+    "nota": 5,
+    "comentario": "Melhor smash burger de Ourinhos! Atendimento impecável no balcão e embalagem muito bem cuidada.",
+    "sentimento": "Positivo",
+    "tags": [
+      "Sabor",
+      "Atendimento",
+      "Embalagem"
+    ],
+    "resumo_ia": "Elogio enfático ao sabor do smash burger, excelência no atendimento e apresentação da embalagem.",
+    "status": "tratado",
+    "alerta_disparado": false
+  }
+]
